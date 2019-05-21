@@ -1,12 +1,12 @@
 #include "functions.h"
 
 void atualizaMemoria(Cache *cache, Memoria *memoria){
-	int i,j,k, indice, tag, endBloco;
+	int i, j, k, indice, tag, endBloco;
 
 	// Se a política de escrita for Write back, gravar na memória.
 	if(cache->parametros.politicaEscrita == 2){
-		for(i=0; i<cache->parametros.numDeConjuntos ;i++){	// Percorre conjuntos.
-			for(j=0; j<cache->parametros.numDeVias ;j++){	// Percorre vias.
+		for(i=0; i < cache->parametros.numDeConjuntos; i++){	// Percorre conjuntos.
+			for(j=0; j < cache->parametros.numDeVias; j++){	// Percorre vias.
 
 				if(cache->bloco[i][j].mudou){ // Se o bloco foi alterado, grava ele na memoria.
 					tag = cache->bloco[i][j].tag;
@@ -22,47 +22,6 @@ void atualizaMemoria(Cache *cache, Memoria *memoria){
 			}
 		}
 	}
-}
-
-Parametros recebeArgumentos(){
-
-Parametros A;
-
-	// Limpa a tela.
-	printf("\e[H\e[2J");
-
-	printf("Algoritmo de ordenação: 1-BubbleSort, 2-SelectionSort, 3-QuickSort\n");
-	printf("Tamanho da cache: 16, 32, 64, 128, 256 ou 512 palavras: \n");
-	printf("Tamanho de bloco: 1, 2, 4, 8, 16 ou 32 palavras por bloco: \n");
-	printf("Ex: --> 3 64 4\n");
-	printf("--> ");
-	scanf("%d %d %d", &(A.algoritmos), &(A.qntPalavras), &(A.tamBloco));
-
-	A.qntDeBlocos = (int)(A.qntPalavras/A.tamBloco);
-	A.numDeConjuntos = (int)(A.qntDeBlocos/A.numDeVias);
-
-	printf("Mapeamento: 1-> Mapeamento Direto, 2-> Associativo por conjunto, 3-> Totalmente Associativo: \n");
-	printf("--> ");
-	scanf("%d", &(A.mapeamentoCache));
-
-	if(A.mapeamentoCache == 1){
-		A.numDeVias = 1;
-	}
-	else if(A.mapeamentoCache == 2){
-		printf("Associatividade: conjunto de 2 vias, 4 vias, 8 vias: \n");
-		printf("--> ");
-		scanf("%d", &(A.numDeVias));
-	}
-	else if(A.mapeamentoCache == 3){
-			A.numDeVias = A.qntDeBlocos;
-	}
-
-	printf("Política de Substituição: 1-LRU, 2-LFU, 3-FIFO: \n");
-	printf("Política de Escrita: 1-Write Through, 2-Write-Back: \n");
-	printf("--> ");
-	scanf("%d %d", &(A.politicaSubstituicao), &(A.politicaEscrita));
-
-	return A;
 }
 
 _Bool comparaPalavras(Palavra A, Palavra B){
@@ -91,7 +50,7 @@ void imprimeEstatisticas(Estatisticas estatisticas){
 	printf("Miss leitura: %d\n",estatisticas.hitEscrita);
 	printf("Hit escrita: %d\n",estatisticas.missLeitura);
 	printf("Miss escrita: %d\n",estatisticas.missEscrita);
-	
+
 }
 
 Bloco newBloco(int tamBloco){
@@ -143,60 +102,60 @@ void setaParametros(Cache *C, Parametros *parametros){
 
 }
 
-void inicializaCache(Cache *C, Parametros *parametros){
+void inicializaCache(Cache *cache, int qntPalavras, int tamBloco, int mapeamento, int numDeVias, int politicaSub, int politicaEsc){
 
 int i, j;
 
 	// Seta os parametros da cache.
-	C->parametros.qntPalavras = parametros->qntPalavras;
-	C->parametros.tamBloco = parametros->tamBloco;
-	C->parametros.mapeamentoCache = parametros->mapeamentoCache;
-	C->parametros.politicaSubstituicao = parametros->politicaSubstituicao;
-	C->parametros.politicaEscrita = parametros->politicaEscrita;
-	C->parametros.qntDeBlocos = parametros->qntDeBlocos;
+	cache->parametros.qntPalavras = qntPalavras;
+	cache->parametros.tamBloco = tamBloco;
+	cache->parametros.mapeamentoCache = mapeamento;
+	cache->parametros.politicaSubstituicao = politicaSub;
+	cache->parametros.politicaEscrita = politicaEsc;
+	cache->parametros.qntDeBlocos = qntDeBlocos;
 
-	switch(C->parametros.mapeamentoCache){
+	switch(cache->parametros.mapeamentoCache){
 		case 1:	// Diretamente mapeada
-			C->parametros.numDeVias = 1;
-			C->parametros.numDeConjuntos = parametros->qntDeBlocos;
+			cache->parametros.numDeVias = 1;
+			cache->parametros.numDeConjuntos = qntDeBlocos;
 			break;
 
 		case 2:	// Associativa por conjuntos
-			C->parametros.numDeVias = parametros->numDeVias;
-			C->parametros.numDeConjuntos = parametros->qntDeBlocos/parametros->numDeVias;
+			cache->parametros.numDeVias = numDeVias;
+			cache->parametros.numDeConjuntos = qntDeBlocos / numDeVias;
 			break;
 
 		case 3:	// Totalmente associativa
-			C->parametros.numDeVias = parametros->qntDeBlocos;
-			C->parametros.numDeConjuntos = 1;
+			cache->parametros.numDeVias = qntDeBlocos;
+			cache->parametros.numDeConjuntos = 1;
+			break;
 	}
 
-	limpaEstatisticas(C); // Zera as estatisticas da cache.
+	limpaEstatisticas(cache); // Zera as estatisticas da cache.
 
 	// Aloca memória para os blocos da cache e FIFO.
-	C->bloco = (Bloco **) malloc((C->parametros.numDeConjuntos) * sizeof(Bloco *));
+	cache->bloco = (Bloco **) malloc((cache->parametros.numDeConjuntos) * sizeof(Bloco *));
 
-	C->FIFO = (int**) malloc((C->parametros.numDeConjuntos) * sizeof(int *));
+	cache->FIFO = (int**) malloc((cache->parametros.numDeConjuntos) * sizeof(int *));
 
-	C->LRU = (int**) malloc((C->parametros.numDeConjuntos) * sizeof(int *));
+	cache->LRU = (int**) malloc((cache->parametros.numDeConjuntos) * sizeof(int *));
 
-	for(i=0;i<C->parametros.numDeConjuntos;i++){
-		C->bloco[i] = (Bloco *) malloc((C->parametros.numDeVias) * sizeof(Bloco));
-		C->FIFO[i] = (int *) malloc((C->parametros.numDeVias) * sizeof(int));
-		C->LRU[i] = (int *) malloc((C->parametros.numDeVias) * sizeof(int));
+	for(i = 0;i < cache->parametros.numDeConjuntos;i++){
+		cache->bloco[i] = (Bloco *) malloc((cache->parametros.numDeVias) * sizeof(Bloco));
+		cache->FIFO[i] = (int *) malloc((cache->parametros.numDeVias) * sizeof(int));
+		cache->LRU[i] = (int *) malloc((cache->parametros.numDeVias) * sizeof(int));
 	}
 
 	// Inicializa todos os blocos da cache e FIFO nula.
-	for(i=0;i<C->parametros.numDeConjuntos;i++){
-		for(j=0;j<C->parametros.numDeVias; j++){
-			C->bloco[i][j] = newBloco(C->parametros.tamBloco);
-			C->FIFO[i][j] = -1;
-			C->LRU[i][j] = -1;
+	for(i = 0;i < cache->parametros.numDeConjuntos;i++){
+		for(j = 0;j < cache->parametros.numDeVias; j++){
+			cache->bloco[i][j] = newBloco(cache->parametros.tamBloco);
+			cache->FIFO[i][j] = -1;
+			cache->LRU[i][j] = -1;
 		}
 	}
 
 }
-
 
 Mapeamento mapeia(Cache *cache, int enderecoDaPalavra){
 
@@ -210,10 +169,6 @@ Mapeamento M; // Cálculos do mapeamento.
 	return M;
 
 }
-
-
-
-
 
 Memoria newMemoria(int tamMemoria){
 
@@ -324,7 +279,7 @@ Palavra acessa(Cache *cache, Memoria *memoria, int enderecoDaPalavra){
 int i;
 Mapeamento M = mapeia(cache, enderecoDaPalavra);
 
-	for(i=0;i<cache->parametros.numDeVias;i++){
+	for(i = 0;i < cache->parametros.numDeVias;i++){
 		if(cache->bloco[M.conjuntoDoBlocoNaCache][i].tag == M.tag && (cache->bloco[M.conjuntoDoBlocoNaCache][i].V)){
 			// Atualiza estatisticas: hitLeitura++.
 			cache->estatisticas.hitLeitura++;

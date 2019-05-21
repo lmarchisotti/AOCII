@@ -10,12 +10,12 @@
 
 typedef int Palavra;
 
-typedef struct{
+typedef struct T_Memoria{
 	int qntDePalavras; // Guarda o tamanho da memória (quantidade de palavras).
 	Palavra *dados;	// Vetor para armazear as palavras.
 } Memoria;
 
-typedef struct Mapeamento{
+typedef struct T_Mapeamento{
 	int enderecoDeBloco;
 	int offsetDeBLoco;
 	int conjuntoDoBlocoNaCache;
@@ -23,7 +23,7 @@ typedef struct Mapeamento{
 }Mapeamento;
 
 // Parametros passados pelo usuário.
-typedef struct{
+typedef struct T_Parametros{
 	int algoritmos;
 	int qntPalavras; 			// Tamanho da cache.
 	int tamBloco;
@@ -35,7 +35,7 @@ typedef struct{
 	int politicaEscrita; 		// 1-Write through || 2-Write back.
 } Parametros;
 
-typedef struct {
+typedef struct T_Estatisticas{
 	int hitLeitura;
 	int hitEscrita;
 	int missLeitura;
@@ -43,7 +43,7 @@ typedef struct {
 } Estatisticas;
 
 
-typedef struct{
+typedef struct T_Bloco{
 	_Bool V; // Bit de validade.
 	_Bool mudou; // Bit mudou.
 	int contador; // Para política de substituição.
@@ -51,7 +51,7 @@ typedef struct{
 	Palavra *palavra; // Vetor de palavras para armazenar as palavras do bloco.
 }Bloco;
 
-typedef struct{
+typedef struct T_Cache{
 	Parametros parametros; // Armazena os parametros da cache passados pelo usuário.
 	Estatisticas estatisticas; // Armazena as estatísticas de cache hit/miss.
 	Bloco **bloco; // A cache é uma matriz de blocos, onde cada linha é um conjunto.
