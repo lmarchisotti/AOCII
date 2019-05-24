@@ -28,3 +28,6 @@ Cache cache; // Declara a cache.
 
 	return 0;
 }
+/*Links uteis pra caralho:
+http://producao.virtual.ufpb.br/books/edusantana/introducao-a-arquitetura-de-computadores-livro/livro/livro.chunked/ch05s07.html
+*/
