@@ -1,19 +1,14 @@
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #define FALSE 0
 #define TRUE 1
-#define TAM_MEMORIA (16 * 1024) // 16KiB.
 #define TAM_PALAVRA 4
+#define TAM_MEMORIA (16 * 1024) // 16KiB.
 
 typedef int Palavra;
 
 typedef struct T_Memoria{
 	int qntDePalavras; // Guarda o tamanho da memória (quantidade de palavras).
 	Palavra *dados;	// Vetor para armazear as palavras.
-} Memoria;
+}Memoria;
 
 typedef struct T_Mapeamento{
 	int enderecoDeBloco;
@@ -33,15 +28,14 @@ typedef struct T_Parametros{
 	int mapeamentoCache; 		// 1-Direto || 2-Associativo por conjunto || 3-Totalmente associativo.
 	int politicaSubstituicao;	// 1-LRU || 2-LFU || 3-FIFO.
 	int politicaEscrita; 		// 1-Write through || 2-Write back.
-} Parametros;
+}Parametros;
 
 typedef struct T_Estatisticas{
 	int hitLeitura;
 	int hitEscrita;
 	int missLeitura;
 	int missEscrita;
-} Estatisticas;
-
+}Estatisticas;
 
 typedef struct T_Bloco{
 	_Bool V; // Bit de validade.
@@ -59,21 +53,27 @@ typedef struct T_Cache{
 	int **LRU;
 }Cache;
 
-Bloco newBloco(int tamBloco);
-void limpaEstatisticas(Cache *C);
-void setaParametros(Cache *C, Parametros *parametros);
-void inicializaCache(Cache *cache, Parametros *parametros);
-Mapeamento mapeia(Cache *cache, int enderecoDaPalavra);
-void grava(Cache *cache, Memoria *memoria , int enderecoDaPalavra, Palavra palavra);
-_Bool invalidaBlocoNoConjunto(Cache *cache, Memoria *memoria, Mapeamento mapeamento);
-Palavra acessa(Cache *cache, Memoria *memoria, int enderecoDaPalavra);
-int copiaBloco(Cache *cache, Memoria *memoria, Mapeamento mapeamento);
-Memoria newMemoria(int tamMemoria);
-Parametros recebeArgumentos();
-void bubbleSort(Memoria *memoria, Cache *cache) ;
+void inicializaCache(Cache *cache, int qntPalavras, int tamBloco, int mapeamento, int numDeVias, int politicaSub, int politicaEsc);
 void limpaCache(Cache *cache);
+Mapeamento mapeia(Cache *cache, int enderecoDaPalavra);
+
+void setaParametros(Cache *C, Parametros *parametros);
+
+Bloco newBloco(int tamBloco);
+_Bool invalidaBlocoNoConjunto(Cache *cache, Memoria *memoria, Mapeamento mapeamento);
+int copiaBloco(Cache *cache, Memoria *memoria, Mapeamento mapeamento);
+
+void grava(Cache *cache, Memoria *memoria , int enderecoDaPalavra, Palavra palavra);
+Palavra acessa(Cache *cache, Memoria *memoria, int enderecoDaPalavra);
+
+void limpaEstatisticas(Cache *C);
 void imprimeEstatisticas(Estatisticas estatisticas);
-_Bool comparaPalavras(Palavra A, Palavra B);
+
+// =============================================================================
+Memoria newMemoria(int tamMemoria);
+void atualizaMemoria(Cache *cache, Memoria *memoria);
+
+// =============================================================================
+void bubbleSort(Memoria *memoria, Cache *cache);
 void selectionSort(Memoria *memoria, Cache *cache);
 void quickSort(Cache *cache, Memoria *memoria, int left, int right);
-void atualizaMemoria(Cache *cache, Memoria *memoria);

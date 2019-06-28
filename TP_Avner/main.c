@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "functions.h"
+#include "cache.h"
 
 int main(int argc, char **argv){
 
 	Cache cache; // Declara a cache.
 
-	int algoritmos, tamBloco, qntDeBlocos, numDeVias, numDeConjuntos;
+	int algoritmos, tamBloco, numDeVias;
 	int qntPalavras; // Tamanho da cache.
 	int mapeamento;  // 1-Direto || 2-Associativo por conjunto || 3-Totalmente associativo.
 	int politicaSub; // 1-LRU || 2-LFU || 3-FIFO.
 	int politicaEsc; // 1-Write through || 2-Write back.
+
+	Memoria memoria = newMemoria(TAM_MEMORIA); // Declara e aloca a memória.
 
 	printf("De acordo com as opções, escolha a configuração da cache.\n\n");
 	printf("Algoritmo de ordenação: 1-BubbleSort, 2-SelectionSort, 3-QuickSort\n");
@@ -32,29 +34,31 @@ int main(int argc, char **argv){
 			scanf("%d", &numDeVias);
 		} else {
 			if(mapeamento == 3){
-			numDeVias = qntDeBlocos;
+				numDeVias = (int)qntPalavras/tamBloco;
+			}
 		}
 	}
 
-	qntDeBlocos = (int)qntPalavras/tamBloco;
-	numDeConjuntos = (int)qntDeBlocos/numDeVias;
-
-	inicializaCache(&cache, algoritmos, qntPalavras, tamBloco, mapeamento, numDeVias, politicaSub, politicaEsc); // Inicializa a cache de acordo com os parâmetros recebidos pelo usuário.
-
-	Memoria memoria = newMemoria(TAM_MEMORIA); // Declara e aloca a memória.
+	// Inicializa a cache de acordo com os parâmetros recebidos pelo usuário.
+	inicializaCache(&cache, qntPalavras, tamBloco, mapeamento, numDeVias, politicaSub, politicaEsc);
 
 	if(algoritmos == 1){
 		bubbleSort(&memoria, &cache);
-	}
-	else if (algoritmos == 2){
-		selectionSort(&memoria, &cache);
-	}
-	else if(algoritmos == 3){
-		quickSort(&cache, &memoria, 0, memoria.qntDePalavras);
+	} else {
+		if(algoritmos == 2){
+			selectionSort(&memoria, &cache);
+		} else {
+			if(algoritmos == 3){
+				quickSort(&cache, &memoria, 0, memoria.qntDePalavras);
+			}
+		}
 	}
 
-	atualizaMemoria(&cache, &memoria); // Caso seja Write-Back, copia os blocos na cache que foram alterados para memória.
+	if(politicaEsc == 2){
+		atualizaMemoria(&cache, &memoria); // Caso seja Write-Back, copia os blocos na cache que foram alterados para memória.
+	}
 
+	printf("\n");
 	imprimeEstatisticas(cache.estatisticas);
 
 	return 0;
