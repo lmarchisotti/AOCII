@@ -129,13 +129,13 @@ Bloco B; //Cria um bloco.
 
 _Bool invalidaBlocoNoConjunto(Cache *cache, Memoria *memoria, Mapeamento mapeamento){
 
-int j, min;
+int i, j, min;
+Bloco minBloco;
 
 	// Invalidar de acordo com a política de substituição.
 	switch(cache->parametros.politicaSubstituicao){
 		case 1: //LRU
 			//  Invalida o bloco que não foi usado a mais tempo.
-
 			cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->LRU[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1]].V = FALSE;
 
 			// Se a política de escrita for Write-Back, gravar na memória.
@@ -152,13 +152,16 @@ int j, min;
 
 		case 2: //LFU
 			// Busca o bloco que tem a menor frequência de acesso.
-			min = 100000;
-			for(int i=0; i < cache->parametros.qntDeBlocos; i++){
+			min = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][0].contador;
+			minBloco = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][0];
+			for(i=1; i < cache->parametros.qntDeBlocos; i++){
 				if(cache->bloco[mapeamento.conjuntoDoBlocoNaCache][i].contador < min){
-					min = i;
+					min = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][i].contador;
+					minBloco = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][i];
 				}
 			}
-			cache->bloco[mapeamento.conjuntoDoBlocoNaCache][min].V = FALSE;
+			minBloco.V = FALSE;
+			cache->bloco[mapeamento.conjuntoDoBlocoNaCache][min] = minBloco;
 
 			// Se a política de escrita for Write-Back, gravar na memória.
 			if(cache->parametros.politicaEscrita == 2){
@@ -228,22 +231,16 @@ int copiaBloco(Cache *cache, Memoria *memoria, Mapeamento mapeamento){
 						//
 
 					}else{
-						if(cache->parametros.politicaSubstituicao == 2){
+						if(cache->parametros.politicaSubstituicao == 3){
 
-							//
-
-						}else{
-							if(cache->parametros.politicaSubstituicao == 3){
-
-								// Atualiza FIFO
-								// Desloca todos os outros blocos pra frente
-								for(j=0; j < cache->parametros.numDeVias-1; j++){
-									cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j] = cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j+1] ;
-								}
-								// Coloca o bloco que vai entrar na ultima posição da fila
-								cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1] = i;
-
+							// Atualiza FIFO
+							// Desloca todos os outros blocos pra a esquerda
+							for(j=0; j < cache->parametros.numDeVias-1; j++){
+								cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j] = cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j+1] ;
 							}
+							// Coloca o bloco que vai entrar na ultima posição da fila
+							cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1] = i;
+
 						}
 					}
 

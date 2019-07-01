@@ -40,7 +40,7 @@ typedef struct T_Estatisticas{
 typedef struct T_Bloco{
 	_Bool V; // Bit de validade.
 	_Bool mudou; // Bit mudou.
-	int contador; // Para política de substituição.
+	unsigned long int contador; // Para política de substituição.
 	int tag;
 	Palavra *palavra; // Vetor de palavras para armazenar as palavras do bloco.
 }Bloco;

@@ -1,0 +1,7 @@
+Trabalho Prático 2 - AOC 2
+Simulador de Cache.
+
+Compilando e executando o código:
+Utilize o comando "make" para compilar e "make clean" para limpar a compilação.
+
+Para executar utilize "./tp2" e siga as instruções do programa.
