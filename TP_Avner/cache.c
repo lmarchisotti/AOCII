@@ -136,26 +136,24 @@ int j, min;
 		case 1: //LRU
 			//  Invalida o bloco que não foi usado a mais tempo.
 
-			/*
 			cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->LRU[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1]].V = FALSE;
 
 			// Se a política de escrita for Write-Back, gravar na memória.
 			if(cache->parametros.politicaEscrita == 2){
-
 				int tag = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->LRU[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1]].tag;
 				int indice = mapeamento.conjuntoDoBlocoNaCache;
 				int endBloco = tag * cache->parametros.numDeConjuntos + indice ;
 
 				for(j=0;j<cache->parametros.tamBloco;j++){
-					memoria->dados[endBloco*cache->parametros.tamBloco + j] =
-					cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->LRU[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1]].palavra[j];
+					memoria->dados[endBloco * cache->parametros.tamBloco + j] = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->LRU[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1]].palavra[j];
 				}
-			}*/
+			}
 			break;
 
 		case 2: //LFU
-			min = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][0].contador;
-			for(int i=1; i < cache->parametros.qntDeBlocos; i++){
+			// Busca o bloco que tem a menor frequência de acesso.
+			min = 100000;
+			for(int i=0; i < cache->parametros.qntDeBlocos; i++){
 				if(cache->bloco[mapeamento.conjuntoDoBlocoNaCache][i].contador < min){
 					min = i;
 				}
@@ -164,14 +162,12 @@ int j, min;
 
 			// Se a política de escrita for Write-Back, gravar na memória.
 			if(cache->parametros.politicaEscrita == 2){
-
 				int tag = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][min].tag;
 				int indice = mapeamento.conjuntoDoBlocoNaCache;
 				int endBloco = tag * cache->parametros.numDeConjuntos + indice ;
 
 				for(j=0;j<cache->parametros.tamBloco;j++){
-					memoria->dados[endBloco*cache->parametros.tamBloco + j] =
-					cache->bloco[mapeamento.conjuntoDoBlocoNaCache][min].palavra[j];
+					memoria->dados[endBloco * cache->parametros.tamBloco + j] = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][min].palavra[j];
 				}
 			}
 			break;
@@ -182,24 +178,23 @@ int j, min;
 
 			// Se a política de escrita for Write-Back, gravar na memória.
 			if(cache->parametros.politicaEscrita == 2){
-
 				int tag = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][0]].tag;
 				int indice = mapeamento.conjuntoDoBlocoNaCache;
-				int endBloco = tag * cache->parametros.numDeConjuntos + indice ;
+				int endBloco = tag * cache->parametros.numDeConjuntos + indice;
 
 				for(j=0;j<cache->parametros.tamBloco;j++){
-					memoria->dados[endBloco*cache->parametros.tamBloco + j] =
-					cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][0]].palavra[j];
+					memoria->dados[endBloco * cache->parametros.tamBloco + j] = cache->bloco[mapeamento.conjuntoDoBlocoNaCache][cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][0]].palavra[j];
 				}
 			}
 			break;
 	}
 
-	return TRUE; // Um bloco foi invalidado na cache (bit de validade = FALSE).
+	return TRUE; // Um bloco foi invalidado na indicecache (bit de validade = FALSE).
 }
 
 int copiaBloco(Cache *cache, Memoria *memoria, Mapeamento mapeamento){
 	int i, j;
+
 	while (1){
 		// Procura um bloco invalido na cache para sobreescrever.
 		for(i=0;i<cache->parametros.numDeVias;i++){
@@ -223,17 +218,35 @@ int copiaBloco(Cache *cache, Memoria *memoria, Mapeamento mapeamento){
 				// Seta o contador do bloco.
 				cache->bloco[mapeamento.conjuntoDoBlocoNaCache][i].contador = 0;
 
-				if(cache->parametros.politicaSubstituicao == 3 || cache->parametros.politicaSubstituicao == 1){
-					// ATUALIZA FIFO
-					if(cache->parametros.mapeamentoCache == 1){//se for diretamente mapeada
-						cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][0] = 0;
-					}
-					else{
-						for(j=0; j < cache->parametros.numDeVias-1; j++){ //desloca todos os outros blocos pra frente
-							cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j] = cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j+1] ;
+				if(cache->parametros.mapeamentoCache == 1){ // Se for diretamente mapeada
+					cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][0] = 0;
+					cache->LRU[mapeamento.conjuntoDoBlocoNaCache][0] = 0;
+				}else{
+
+					if(cache->parametros.politicaSubstituicao == 1){
+
+						//
+
+					}else{
+						if(cache->parametros.politicaSubstituicao == 2){
+
+							//
+
+						}else{
+							if(cache->parametros.politicaSubstituicao == 3){
+
+								// Atualiza FIFO
+								// Desloca todos os outros blocos pra frente
+								for(j=0; j < cache->parametros.numDeVias-1; j++){
+									cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j] = cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][j+1] ;
+								}
+								// Coloca o bloco que vai entrar na ultima posição da fila
+								cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1] = i;
+
+							}
 						}
-						cache->FIFO[mapeamento.conjuntoDoBlocoNaCache][cache->parametros.numDeVias-1] = i;	//coloca o bloco que vai entrar na ultima posição da fila
 					}
+
 				}
 
 				return i;
@@ -257,9 +270,6 @@ Mapeamento M = mapeia(cache, enderecoDaPalavra);
 
 			// Incrementa contador de uso.
 			cache->bloco[M.conjuntoDoBlocoNaCache][i].contador++;
-
-			//LRU
-
 
 			// Retorna a palavra da cache.
 			return cache->bloco[M.conjuntoDoBlocoNaCache][i].palavra[M.offsetDeBLoco];
@@ -303,20 +313,6 @@ int i;
 
 			// Incrementa contador de uso.
 			cache->bloco[mapeamento.conjuntoDoBlocoNaCache][i].contador++;
-
-			//LRU
-			/*
-			for(j=0;j<cache->parametros.numDeVias;j++){
-				if(cache->LRU[mapeamento.conjuntoDoBlocoNaCache][j] == i){
-					for(k=j;k>0;k--){
-						cache->LRU[mapeamento.conjuntoDoBlocoNaCache][k] = cache->LRU[mapeamento.conjuntoDoBlocoNaCache][k-1];
-					}
-					cache->LRU[mapeamento.conjuntoDoBlocoNaCache][0] = i;
-					break;
-
-				}
-			}
-			*/
 
 			// Write Through.
 			if(cache->parametros.politicaEscrita == 1){
@@ -382,8 +378,7 @@ void atualizaMemoria(Cache *cache, Memoria *memoria){
 					endBloco = tag * cache->parametros.numDeConjuntos + indice ;
 
 					for(k=0;k<cache->parametros.tamBloco;k++){ // Percorre palavras do bloco.
-						memoria->dados[endBloco*cache->parametros.tamBloco + k] =
-						cache->bloco[i][j].palavra[k];
+						memoria->dados[endBloco*cache->parametros.tamBloco + k] = cache->bloco[i][j].palavra[k];
 					}
 				}
 
